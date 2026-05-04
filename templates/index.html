@@ -3,41 +3,111 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AutoDashboard | Configure</title>
-    <!-- This script is the magic that makes it look like a SaaS app -->
+    <title>AI Data Architect</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>tailwind.config = { darkMode: 'class' }</script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    <style> body { font-family: 'Inter', sans-serif; letter-spacing: -0.01em; } </style>
 </head>
-<body class="bg-slate-50 text-slate-800 font-sans h-screen flex items-center justify-center">
+<body class="bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 min-h-screen flex flex-col transition-colors duration-500">
 
-    <!-- The White Card Wrapper -->
-    <div class="bg-white p-8 rounded-xl shadow-lg border border-slate-200 max-w-md w-full">
-        <h1 class="text-2xl font-bold text-slate-900 mb-2">Configure Dashboard</h1>
-        <p class="text-sm text-slate-500 mb-6">Upload your data and define your analytical strategy.</p>
-
-        <!-- The Form -->
-        <form action="/upload" method="POST" enctype="multipart/form-data" class="space-y-5">
-            
-            <!-- 1. The Data -->
-            <div>
-                <label class="block text-sm font-semibold mb-1">1. Upload CSV Data</label>
-                <input type="file" name="data_file" accept=".csv" required 
-                       class="w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 cursor-pointer">
-            </div>
-
-            <!-- 2. The Universal Prompt -->
-            <div>
-                <label class="block text-sm font-semibold mb-1">2. What do you want to know? (Optional)</label>
-                <textarea name="user_prompt" rows="3" placeholder="e.g., 'Compare average salaries across departments', 'Find the region with the most delivery delays', or leave blank for a general overview." 
-                          class="w-full p-2 border border-slate-300 rounded text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none"></textarea>
-            </div>
-
-            <!-- Submit -->
-            <button type="submit" class="w-full bg-blue-600 text-white font-bold py-2 px-4 rounded hover:bg-blue-700 transition duration-200 mt-4">
-                Generate AI Dashboard
-            </button>
-            
-        </form>
+    <!-- Error Toast (Hidden by default) -->
+    <div id="error-toast" class="fixed top-6 left-1/2 -translate-x-1/2 bg-red-600 text-white px-6 py-3 rounded-full shadow-lg text-sm font-medium transform transition-all duration-300 opacity-0 -translate-y-4 pointer-events-none z-50">
+        System Protocol: Only .csv files are supported.
     </div>
 
+    <!-- Main Content -->
+    <main class="flex-grow flex items-center justify-center p-6">
+        <div class="max-w-md w-full">
+            <div class="text-center mb-10">
+                <h1 class="text-2xl font-light tracking-widest uppercase mb-2">Auto-Dashboard</h1>
+                <p class="text-sm opacity-60">Upload raw data to generate visual charts with executive insights.</p>
+            </div>
+
+            <form id="upload-form" action="/upload" method="POST" enctype="multipart/form-data" class="space-y-6">
+                
+                <!-- File Upload -->
+                <div class="relative border-2 border-dashed border-slate-300 dark:border-slate-700 rounded-xl p-8 text-center hover:border-blue-500 dark:hover:border-yellow-500 transition-colors group">
+                    <input type="file" name="data_file" id="file-input" required accept=".csv" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer">
+                    <div class="space-y-2">
+                        <span class="text-3xl group-hover:scale-110 transition-transform block">📄</span>
+                        <p id="file-name" class="text-sm font-medium">Select a CSV file</p>
+                        <p class="text-xs opacity-50">Max size 5MB</p>
+                    </div>
+                </div>
+
+                <!-- Strategic Directive -->
+                <div>
+                    <label class="block text-xs font-semibold uppercase tracking-[0.1em] opacity-70 mb-2">Strategic Directive (Optional)</label>
+                    <input type="text" name="user_prompt" placeholder="e.g., Identify revenue leaks..." class="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-yellow-500 transition-all">
+                </div>
+
+                <!-- Submit Button -->
+                <button type="submit" id="submit-btn" class="w-full bg-slate-900 dark:bg-white text-white dark:text-slate-900 font-semibold py-3 rounded-lg hover:opacity-90 transition-opacity flex justify-center items-center gap-2">
+                    <span>Generate Dashboard</span>
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                </button>
+            </form>
+        </div>
+    </main>
+
+    <!-- The Minimalist Footer -->
+    <footer class="py-6 text-center shrink-0">
+        <p class="text-xs tracking-widest text-slate-400 dark:text-slate-500 uppercase">
+            Developed by <a href="https://www.linkedin.com/in/pranav-joshi-268595251/" target="_blank" class="text-slate-900 dark:text-white font-semibold hover:underline">Pranav Joshi</a>
+        </p>
+    </footer>
+
+    <script>
+        const fileInput = document.getElementById('file-input');
+        const fileNameDisplay = document.getElementById('file-name');
+        const form = document.getElementById('upload-form');
+        const errorToast = document.getElementById('error-toast');
+        const submitBtn = document.getElementById('submit-btn');
+
+        // Update file name text when file is selected
+        fileInput.addEventListener('change', function(e) {
+            if(e.target.files.length > 0) {
+                fileNameDisplay.textContent = e.target.files[0].name;
+            } else {
+                fileNameDisplay.textContent = 'Select a CSV file';
+            }
+        });
+
+        // Intercept form submission to validate file type
+        form.addEventListener('submit', function(e) {
+            const file = fileInput.files[0];
+            
+            // Check if it's a CSV
+            if (file && !file.name.toLowerCase().endsWith('.csv')) {
+                e.preventDefault(); // Stop the form from submitting
+                
+                // Show the error toast
+                errorToast.classList.remove('opacity-0', '-translate-y-4');
+                errorToast.classList.add('opacity-100', 'translate-y-0');
+                
+                // Hide it after 3 seconds
+                setTimeout(() => {
+                    errorToast.classList.remove('opacity-100', 'translate-y-0');
+                    errorToast.classList.add('opacity-0', '-translate-y-4');
+                }, 3000);
+                
+                // Reset the file input
+                fileInput.value = '';
+                fileNameDisplay.textContent = 'Select a CSV file';
+                return;
+            }
+
+            // If it passes, show a loading state on the button
+            submitBtn.innerHTML = `
+                <svg class="animate-spin h-4 w-4 mr-2" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                Processing Data...
+            `;
+            submitBtn.classList.add('opacity-75', 'cursor-not-allowed');
+        });
+    </script>
 </body>
 </html>
