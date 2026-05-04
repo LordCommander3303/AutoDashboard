@@ -6,7 +6,6 @@ A minimalist, high-performance executive dashboard that transforms raw CSV data 
 *   **Natural Language Querying:** Ask complex questions about your data (e.g., "Where am I losing money?") and get immediate visual answers.
 *   **Intelligent Auto-Visualization:** Automatically selects the most impactful chart types (Bar, Line, etc.) based on data metadata.
 *   **Executive Zen UI:** A clean, distraction-free interface designed for decision-makers.
-*   **Adaptive Dark Mode:** High-contrast aesthetic with synchronized chart restyling.
 
 ## 🛠️ Tech Stack
 *   **Backend:** Python / Flask
