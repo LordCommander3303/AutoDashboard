@@ -2,117 +2,86 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Executive Dashboard</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
-    <script>
-        tailwind.config = { 
-            darkMode: 'class',
-            theme: {
-                extend: {
-                    colors: {
-                        brand: '#2563eb', // Default Blue
-                        accent: '#facc15'  // Dark Mode Yellow
-                    }
-                }
-            }
-        }
-    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; letter-spacing: -0.01em; }
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+    </style>
 </head>
-<body class="bg-slate-50 dark:bg-slate-900 transition-colors duration-300 min-h-screen">
-    <!-- Navigation -->
-    <nav class="bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 p-4 shadow-sm sticky top-0 z-50">
-        <div class="max-w-7xl mx-auto flex justify-between items-center">
-            <h1 class="text-xl font-bold text-slate-800 dark:text-white">
-                Executive <span class="text-blue-600 dark:text-yellow-400 transition-colors">Insights</span>
-            </h1>
-            <div class="flex gap-4 items-center">
-                <!-- Theme Toggle -->
-                <button id="theme-toggle" class="p-2 bg-slate-100 dark:bg-slate-700 rounded-lg hover:ring-2 ring-blue-400 dark:ring-yellow-400 transition-all text-lg">
-                    <span class="dark:hidden">🌙</span><span class="hidden dark:inline">☀️</span>
-                </button>
-                <a href="/" class="bg-blue-600 dark:bg-yellow-500 hover:bg-blue-700 dark:hover:bg-yellow-600 text-white dark:text-slate-900 px-5 py-2 rounded-lg text-sm font-bold shadow-md transition-colors">
-                    Analyze Another Data
+<body class="bg-slate-50 text-slate-900 h-screen flex flex-col">
+    
+    <!-- Navigation Bar -->
+    <nav class="p-6 w-full flex justify-between items-center shrink-0 border-b border-slate-200">
+        <div class="max-w-7xl mx-auto w-full flex justify-between items-center">
+            <h1 class="text-lg font-light tracking-widest uppercase text-slate-800">Auto-Dashboard</h1>
+            
+            <div class="flex items-center gap-6">
+                <!-- Solid Professional Button -->
+                <a href="/" class="text-xs font-bold tracking-widest uppercase bg-slate-800 text-white px-6 py-3 hover:bg-slate-700 transition-colors">
+                    New Analysis
                 </a>
             </div>
         </div>
     </nav>
 
-    <!-- Content -->
-    <div class="max-w-7xl mx-auto p-6 grid grid-cols-1 md:grid-cols-2 gap-8">
+    <!-- Content Grid -->
+    <main class="flex-grow overflow-y-auto max-w-7xl mx-auto w-full p-6 grid grid-cols-1 md:grid-cols-2 gap-8">
         {% for chart in dashboard_data %}
-        <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm transition-all hover:shadow-md">
-            <div class="flex items-center gap-2 mb-2">
-                <div class="w-1.5 h-4 bg-blue-600 dark:bg-yellow-400 rounded-full transition-colors"></div>
-                <p class="text-xs font-black text-blue-600 dark:text-yellow-400 uppercase tracking-widest">Strategic Insight</p>
+        <div class="flex flex-col p-6 bg-white border border-slate-200 shadow-sm">
+            <div class="mb-4">
+                <span class="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-800">Analysis {{ loop.index }}</span>
+                <p class="text-sm mt-2 text-slate-600 font-light leading-relaxed">"{{ chart.rationale }}"</p>
             </div>
-            <p class="text-sm text-slate-600 dark:text-slate-300 mb-6 font-medium italic">"{{ chart.rationale }}"</p>
-            
-            <div id="{{ chart.id }}" class="w-full h-[400px]"></div>
+            <div id="{{ chart.id }}" class="w-full h-[320px]"></div>
         </div>
         {% endfor %}
-    </div>
+    </main>
+
+    <!-- The Minimalist Footer -->
+    <footer class="py-6 text-center shrink-0">
+        <p class="text-xs tracking-widest text-slate-400 uppercase">
+            Developed by <a href="https://www.linkedin.com/in/pranav-joshi-268595251/" target="_blank" class="text-slate-800 font-bold hover:underline">Pranav Joshi</a>
+        </p>
+    </footer>
 
     <script>
         const allCharts = {{ dashboard_data | tojson }};
-        const html = document.documentElement;
         
-        // Define our two primary colors
-        const colors = {
-            light: '#2563eb', // Blue
-            dark: '#facc15'   // Yellow
-        };
+        // Locked to the professional Slate 800 theme
+        const theme = { accent: '#1e293b', text: '#475569', grid: '#e2e8f0' };
 
-        function getChartColor() {
-            return html.classList.contains('dark') ? colors.dark : colors.light;
-        }
-
-        function getLayout(title) {
-            const isDark = html.classList.contains('dark');
-            return {
-                title: { 
-                    text: title, 
-                    font: { size: 14, color: isDark ? '#e2e8f0' : '#1e293b', family: 'Inter' } 
-                },
-                paper_bgcolor: 'rgba(0,0,0,0)',
-                plot_bgcolor: 'rgba(0,0,0,0)',
-                xaxis: { 
-                    gridcolor: isDark ? '#334155' : '#f1f5f9',
-                    tickfont: { color: isDark ? '#94a3b8' : '#64748b' }
-                },
-                yaxis: { 
-                    gridcolor: isDark ? '#334155' : '#f1f5f9',
-                    tickfont: { color: isDark ? '#94a3b8' : '#64748b' }
-                },
-                margin: { t: 40, b: 40, l: 40, r: 20 }
-            };
-        }
-
-        // Initial Draw
-        allCharts.forEach(chart => {
-            const trace = { 
-                x: chart.x, 
-                y: chart.y, 
-                type: chart.type, 
-                marker: { color: getChartColor() },
-                line: { color: getChartColor(), width: 3 }
-            };
-            Plotly.newPlot(chart.id, [trace], getLayout(chart.title), {responsive: true, displayModeBar: false});
-        });
-
-        // Toggle Logic
-        document.getElementById('theme-toggle').addEventListener('click', () => {
-            html.classList.toggle('dark');
-            const newColor = getChartColor();
-
+        function draw() {
             allCharts.forEach(chart => {
-                // Update the layout (labels/grid)
-                Plotly.relayout(chart.id, getLayout(chart.title));
-                // Update the trace (the actual bars/lines)
-                Plotly.restyle(chart.id, {
-                    'marker.color': newColor,
-                    'line.color': newColor
-                });
+                const trace = { 
+                    x: chart.x, y: chart.y, type: chart.type, 
+                    marker: { color: theme.accent }, 
+                    line: { color: theme.accent, width: 2 } 
+                };
+                const layout = {
+                    title: { text: chart.title, font: { size: 13, color: theme.text, family: 'Inter' }, x: 0 },
+                    paper_bgcolor: 'rgba(0,0,0,0)',
+                    plot_bgcolor: 'rgba(0,0,0,0)',
+                    xaxis: { showgrid: false, tickfont: { size: 11, color: theme.text } },
+                    yaxis: { gridcolor: theme.grid, tickfont: { size: 11, color: theme.text } },
+                    margin: { t: 40, b: 40, l: 40, r: 20 },
+                    autosize: true
+                };
+                Plotly.newPlot(chart.id, [trace], layout, {responsive: true, displayModeBar: false});
+            });
+        }
+
+        draw();
+        
+        // Handle normal window resizing smoothly
+        window.addEventListener('resize', () => {
+            allCharts.forEach(chart => {
+                Plotly.Plots.resize(chart.id);
             });
         });
     </script>
