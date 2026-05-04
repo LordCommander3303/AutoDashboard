@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Executive Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
+    <script>
+        tailwind.config = { 
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: '#2563eb', // Default Blue
+                        accent: '#facc15'  // Dark Mode Yellow
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-slate-50 dark:bg-slate-900 transition-colors duration-300 min-h-screen">
+    <!-- Navigation -->
+    <nav class="bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 p-4 shadow-sm sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto flex justify-between items-center">
+            <h1 class="text-xl font-bold text-slate-800 dark:text-white">
+                Executive <span class="text-blue-600 dark:text-yellow-400 transition-colors">Insights</span>
+            </h1>
+            <div class="flex gap-4 items-center">
+                <!-- Theme Toggle -->
+                <button id="theme-toggle" class="p-2 bg-slate-100 dark:bg-slate-700 rounded-lg hover:ring-2 ring-blue-400 dark:ring-yellow-400 transition-all text-lg">
+                    <span class="dark:hidden">🌙</span><span class="hidden dark:inline">☀️</span>
+                </button>
+                <a href="/" class="bg-blue-600 dark:bg-yellow-500 hover:bg-blue-700 dark:hover:bg-yellow-600 text-white dark:text-slate-900 px-5 py-2 rounded-lg text-sm font-bold shadow-md transition-colors">
+                    Analyze Another Data
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Content -->
+    <div class="max-w-7xl mx-auto p-6 grid grid-cols-1 md:grid-cols-2 gap-8">
+        {% for chart in dashboard_data %}
+        <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm transition-all hover:shadow-md">
+            <div class="flex items-center gap-2 mb-2">
+                <div class="w-1.5 h-4 bg-blue-600 dark:bg-yellow-400 rounded-full transition-colors"></div>
+                <p class="text-xs font-black text-blue-600 dark:text-yellow-400 uppercase tracking-widest">Strategic Insight</p>
+            </div>
+            <p class="text-sm text-slate-600 dark:text-slate-300 mb-6 font-medium italic">"{{ chart.rationale }}"</p>
+            
+            <div id="{{ chart.id }}" class="w-full h-[400px]"></div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <script>
+        const allCharts = {{ dashboard_data | tojson }};
+        const html = document.documentElement;
+        
+        // Define our two primary colors
+        const colors = {
+            light: '#2563eb', // Blue
+            dark: '#facc15'   // Yellow
+        };
+
+        function getChartColor() {
+            return html.classList.contains('dark') ? colors.dark : colors.light;
+        }
+
+        function getLayout(title) {
+            const isDark = html.classList.contains('dark');
+            return {
+                title: { 
+                    text: title, 
+                    font: { size: 14, color: isDark ? '#e2e8f0' : '#1e293b', family: 'Inter' } 
+                },
+                paper_bgcolor: 'rgba(0,0,0,0)',
+                plot_bgcolor: 'rgba(0,0,0,0)',
+                xaxis: { 
+                    gridcolor: isDark ? '#334155' : '#f1f5f9',
+                    tickfont: { color: isDark ? '#94a3b8' : '#64748b' }
+                },
+                yaxis: { 
+                    gridcolor: isDark ? '#334155' : '#f1f5f9',
+                    tickfont: { color: isDark ? '#94a3b8' : '#64748b' }
+                },
+                margin: { t: 40, b: 40, l: 40, r: 20 }
+            };
+        }
+
+        // Initial Draw
+        allCharts.forEach(chart => {
+            const trace = { 
+                x: chart.x, 
+                y: chart.y, 
+                type: chart.type, 
+                marker: { color: getChartColor() },
+                line: { color: getChartColor(), width: 3 }
+            };
+            Plotly.newPlot(chart.id, [trace], getLayout(chart.title), {responsive: true, displayModeBar: false});
+        });
+
+        // Toggle Logic
+        document.getElementById('theme-toggle').addEventListener('click', () => {
+            html.classList.toggle('dark');
+            const newColor = getChartColor();
+
+            allCharts.forEach(chart => {
+                // Update the layout (labels/grid)
+                Plotly.relayout(chart.id, getLayout(chart.title));
+                // Update the trace (the actual bars/lines)
+                Plotly.restyle(chart.id, {
+                    'marker.color': newColor,
+                    'line.color': newColor
+                });
+            });
+        });
+    </script>
+</body>
+</html>
